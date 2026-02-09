@@ -1,9 +1,10 @@
-# Body Motion Detection
+# Workout Motion Detection
 
-A real-time body motion detection application that uses computer vision to track arm movements and count repetitions. This project leverages MediaPipe's pose estimation and OpenCV to detect when both arms are raised vertically.
+A real-time workout motion detection application that uses computer vision to track arm movements and count repetitions. This project leverages MediaPipe's pose estimation and OpenCV to detect when both arms are raised vertically.
 
 ## Features
 
+## **ALERT: currently only for track dumbbell lateral raise
 - **Real-time Pose Detection**: Uses MediaPipe Pose Landmarker for accurate body pose estimation
 - **Arm Tracking**: Detects and tracks both arms (shoulders, elbows, wrists)
 - **Repetition Counter**: Automatically counts when both arms are raised vertically
@@ -11,7 +12,6 @@ A real-time body motion detection application that uses computer vision to track
   - Displays real-time rep count
   - Shows motivational messages based on performance
   - Shows arm angles for debugging
-  - Color-coded status indicators (green when arms are up, red when down)
 - **Webcam Integration**: Works with any standard webcam
 
 ## Requirements
@@ -47,8 +47,8 @@ This script will:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/wenjuin95/body-motion-detection.git
-cd body-motion-detection
+git clone https://github.com/wenjuin95/workout-motion-detection.git
+cd workout-motion-detection
 ```
 
 2. Create a virtual environment (optional but recommended):
@@ -85,22 +85,6 @@ python main.py
    - Press 'q' key, or
    - Click the X button on the window
 
-## How It Works
-
-The application uses:
-
-1. **MediaPipe Pose Landmarker**: A machine learning model that detects 33 body landmarks in real-time
-2. **Angle Calculation**: Computes the angle at the elbow joint to determine if arms are straight
-3. **Vertical Alignment Check**: Verifies that shoulder, elbow, and wrist are vertically aligned
-4. **State Machine**: Tracks arm position to count repetitions (avoids double-counting)
-
-### Detection Criteria
-
-Both arms are considered "up" when:
-- Left and right arms are vertically aligned (within 3% tolerance)
-- Left elbow angle > 160 degrees
-- Right elbow angle > 160 degrees
-
 ## Troubleshooting
 
 ### Webcam not found
@@ -119,7 +103,7 @@ Both arms are considered "up" when:
 ## Project Structure
 
 ```
-body-motion-detection/
+workout-motion-detection/
 ├── main.py                      # Main application code
 ├── pose_landmarker_lite.task    # MediaPipe pose detection model
 ├── requirements.txt             # Python dependencies
@@ -127,32 +111,6 @@ body-motion-detection/
 ├── .gitignore                  # Git ignore rules
 └── README.md                   # This file
 ```
-
-## Technical Details
-
-### Key Functions
-
-- `calculate_angle(a, b, c)`: Calculates the angle at point b given three landmarks
-- `draw_line(a, b, frame, color)`: Draws a line between two landmarks on the frame
-- `is_vertical(a, b, c, tolerance)`: Checks if three points are vertically aligned
-
-### Customization
-
-You can modify the following parameters in `main.py`:
-
-- **Camera resolution** (lines 57-58): Adjust width and height
-- **Angle threshold** (line 116-117): Change minimum angle for "straight arm" detection
-- **Vertical tolerance** (line 33): Adjust vertical alignment sensitivity
-- **Rep count messages** (lines 146-151): Customize motivational messages
-
-## License
-
-This project is open source. Please check with the repository owner for specific license terms.
-
-## Contributing
-
-Contributions are welcome! Feel free to submit issues or pull requests.
-
 ## Acknowledgments
 
 - [MediaPipe](https://mediapipe.dev/) by Google for the pose estimation model
