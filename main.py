@@ -2,14 +2,40 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-import time
+import math
 
-url = "https://www.geeksforgeeks.org/python/python-script-to-open-a-web-browser/"
+# ---------------- Functions ----------------
 
-driver = webdriver.Chrome()
-driver.get(url)
+def calculate_angle(a, b, c):
+    """
+    Calculates angle at point b (in degrees)
+    a, b, c are landmarks with x,y
+    """
+    ba = (a.x - b.x, a.y - b.y)
+    bc = (c.x - b.x, c.y - b.y)
+
+    dot = ba[0]*bc[0] + ba[1]*bc[1]
+    mag_ba = math.hypot(ba[0], ba[1])
+    mag_bc = math.hypot(bc[0], bc[1])
+
+    if mag_ba == 0 or mag_bc == 0:
+        return 0
+
+    angle = math.degrees(math.acos(dot / (mag_ba * mag_bc)))
+    return angle
+
+def draw_line(a, b, frame, color):
+    h, w, _ = frame.shape
+    p1 = (int(a.x * w), int(a.y * h))
+    p2 = (int(b.x * w), int(b.y * h))
+    cv2.line(frame, p1, p2, color, 2)
+
+def is_vertical(a, b, c, tolerance=0.03):
+    return (
+        abs(a.y - b.y) < tolerance and
+        abs(b.y - c.y) < tolerance
+    )
+
 
 # ---------------- MediaPipe setup ----------------
 BaseOptions = python.BaseOptions
@@ -26,15 +52,16 @@ landmarker = PoseLandmarker.create_from_options(options)
 
 # ---------------- OpenCV setup ----------------
 cap = cv2.VideoCapture(0)
-cv2.namedWindow("Pose Detection", cv2.WINDOW_NORMAL)
+
+# Set higher resolution
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 12800)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 frame_id = 0
 
 # ---------------- State ----------------
-left_count = 0
-right_count = 0
-left_is_up = False
-right_is_up = False
+both_count = 0
+both_is_up = False
 
 # ---------------- Main loop ----------------
 while True:
@@ -58,47 +85,79 @@ while True:
         landmarks = result.pose_landmarks[0]
 
         # Landmark indices (MediaPipe Pose)
-        LEFT_SHOULDER = 11
-        RIGHT_SHOULDER = 12
-        LEFT_WRIST = 15
-        RIGHT_WRIST = 16
+        LEFT_SHOULDER = 12
+        LEFT_ELBOW = 14
+        LEFT_WRIST = 16
 
-        left_wrist = landmarks[LEFT_WRIST]
-        right_wrist = landmarks[RIGHT_WRIST]
+        RIGHT_SHOULDER = 11
+        RIGHT_ELBOW = 13
+        RIGHT_WRIST = 15
+
         left_shoulder = landmarks[LEFT_SHOULDER]
+        left_elbow    = landmarks[LEFT_ELBOW]
+        left_wrist    = landmarks[LEFT_WRIST]
+
         right_shoulder = landmarks[RIGHT_SHOULDER]
+        right_elbow    = landmarks[RIGHT_ELBOW]
+        right_wrist    = landmarks[RIGHT_WRIST]
 
-        # -------- LEFT HAND --------
-        if left_wrist.y < left_shoulder.y:
-            if not left_is_up:
-                left_count += 1
-                print(f"LEFT → total: {left_count}")
-                #driver.find_element("tag name", "body").send_keys(Keys.PAGE_DOWN)
-            left_is_up = True
+
+        # -------- counting logic --------
+        # Calculate angles
+        left_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
+        right_angle = calculate_angle(right_shoulder, right_elbow, right_wrist)
+        # Check vertical alignment
+        left_vertical = is_vertical(left_shoulder, left_elbow, left_wrist)
+        right_vertical = is_vertical(right_shoulder, right_elbow, right_wrist)
+
+        both_arms_up = (
+            left_vertical and
+            right_vertical and
+            left_angle > 160 and
+            right_angle > 160
+        )
+
+        if both_arms_up:
+            if not both_is_up:
+                both_count += 1
+                print(f"Both arms up count: {both_count}")
+            both_is_up = True
         else:
-            left_is_up = False
+            both_is_up = False
 
-        # -------- RIGHT HAND --------
-        if right_wrist.y < right_shoulder.y:
-            if not right_is_up:
-                right_count += 1
-                print(f"RIGHT → total: {right_count}")
-                driver.find_element("tag name", "body").send_keys(Keys.PAGE_DOWN)
-            right_is_up = True
-        else:
-            right_is_up = False
+        # Draw landmarks
+        #h, w, _ = frame.shape
+        #for lm in landmarks:
+        #    cx, cy = int(lm.x * w), int(lm.y * h)
+        #    cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
 
-        # -------- Draw landmarks --------
-        h, w, _ = frame.shape
-        for lm in landmarks:
-            cx, cy = int(lm.x * w), int(lm.y * h)
-            cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
+        # Draw arm alignment
+        #draw_line(left_shoulder, left_elbow, frame, (255, 0, 0))
+        #draw_line(left_elbow, left_wrist, frame, (255, 0, 0))
+        #draw_line(right_shoulder, right_elbow, frame, (0, 0, 255))
+        #draw_line(right_elbow, right_wrist, frame, (0, 0, 255))
 
         # -------- Draw counters --------
-        cv2.putText(frame, f"Left hand: {left_count}", (30, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"Right hand: {right_count}", (30, 80),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        status = " GOOD !!!" if both_arms_up else "RAISE BOTH ARMS"
+        color = (0, 255, 0) if both_arms_up else (0, 0, 255)
+
+        cv2.putText(frame, f"Reps: {both_count}", (30, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+        if both_count < 10:
+            cv2.putText(frame, f"(so weak)", (200, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        else:
+            cv2.putText(frame, f"(Power !!!)", (200, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        cv2.putText(frame, status, (30, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
+
+        cv2.putText(frame, f"L angle: {int(left_angle)}", (30, 120),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
+
+        cv2.putText(frame, f"R angle: {int(right_angle)}", (30, 150),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     # Show frame
     cv2.imshow("Pose Detection", frame)
@@ -118,4 +177,3 @@ while True:
 # ---------------- Cleanup ----------------
 cap.release()
 cv2.destroyAllWindows()
-driver.quit()
