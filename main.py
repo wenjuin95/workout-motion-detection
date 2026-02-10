@@ -6,11 +6,8 @@ import math
 
 # ---------------- Functions ----------------
 
+# Calculate angle between three points (in degrees)
 def calculate_angle(a, b, c):
-    """
-    Calculates angle at point b (in degrees)
-    a, b, c are landmarks with x,y
-    """
     ba = (a.x - b.x, a.y - b.y)
     bc = (c.x - b.x, c.y - b.y)
 
@@ -24,17 +21,20 @@ def calculate_angle(a, b, c):
     angle = math.degrees(math.acos(dot / (mag_ba * mag_bc)))
     return angle
 
+# Check if three points are vertically aligned
+def is_vertical(a, b, c, tolerance=0.03):
+    return (
+        abs(a.y - b.y) < tolerance and
+        abs(b.y - c.y) < tolerance
+    )
+
+# Draw line between two landmarks
 def draw_line(a, b, frame, color):
     h, w, _ = frame.shape
     p1 = (int(a.x * w), int(a.y * h))
     p2 = (int(b.x * w), int(b.y * h))
     cv2.line(frame, p1, p2, color, 2)
 
-def is_vertical(a, b, c, tolerance=0.03):
-    return (
-        abs(a.y - b.y) < tolerance and
-        abs(b.y - c.y) < tolerance
-    )
 
 
 # ---------------- MediaPipe setup ----------------
@@ -43,6 +43,7 @@ PoseLandmarker = vision.PoseLandmarker
 PoseLandmarkerOptions = vision.PoseLandmarkerOptions
 VisionRunningMode = vision.RunningMode
 
+# create a pose landmarker instance with the video mode:
 options = PoseLandmarkerOptions(
     base_options=BaseOptions(model_asset_path="pose_landmarker_lite.task"),
     running_mode=VisionRunningMode.VIDEO,
