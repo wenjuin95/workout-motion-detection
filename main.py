@@ -54,7 +54,7 @@ landmarker = PoseLandmarker.create_from_options(options)
 cap = cv2.VideoCapture(0)
 
 # Set higher resolution
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 12800)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 128000)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 frame_id = 0
@@ -126,16 +126,16 @@ while True:
             both_is_up = False
 
         # Draw landmarks
-        #h, w, _ = frame.shape
-        #for lm in landmarks:
-        #    cx, cy = int(lm.x * w), int(lm.y * h)
-        #    cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
+        h, w, _ = frame.shape
+        for lm in landmarks:
+            cx, cy = int(lm.x * w), int(lm.y * h)
+            cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
 
         # Draw arm alignment
-        #draw_line(left_shoulder, left_elbow, frame, (255, 0, 0))
-        #draw_line(left_elbow, left_wrist, frame, (255, 0, 0))
-        #draw_line(right_shoulder, right_elbow, frame, (0, 0, 255))
-        #draw_line(right_elbow, right_wrist, frame, (0, 0, 255))
+        draw_line(left_shoulder, left_elbow, frame, (255, 255, 255))
+        draw_line(left_elbow, left_wrist, frame, (255, 255, 255))
+        draw_line(right_shoulder, right_elbow, frame, (255, 255, 255))
+        draw_line(right_elbow, right_wrist, frame, (255, 255, 255))
 
         # -------- Draw counters --------
         status = " GOOD !!!" if both_arms_up else "RAISE BOTH ARMS"
@@ -164,7 +164,7 @@ while True:
     key = cv2.waitKey(1) & 0xFF
 
     # Quit by Q
-    if key == ord("q"):
+    if key == ord("q") or key == 27:
         break
 
     # Quit by clicking X (safe)
