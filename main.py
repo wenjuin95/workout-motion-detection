@@ -2,24 +2,16 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-import math
+import numpy as np
 
 # ---------------- Functions ----------------
 
 # Calculate angle between three points (in degrees)
 def calculate_angle(a, b, c):
-    ba = (a.x - b.x, a.y - b.y)
-    bc = (c.x - b.x, c.y - b.y)
-
-    dot = ba[0]*bc[0] + ba[1]*bc[1]
-    mag_ba = math.hypot(ba[0], ba[1])
-    mag_bc = math.hypot(bc[0], bc[1])
-
-    if mag_ba == 0 or mag_bc == 0:
-        return 0
-
-    angle = math.degrees(math.acos(dot / (mag_ba * mag_bc)))
-    return angle
+    ba = np.array([a.x - b.x, a.y - b.y])
+    bc = np.array([c.x - b.x, c.y - b.y])
+    cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-6)
+    return np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0)))
 
 # Check if three points are vertically aligned
 def is_vertical(a, b, c, tolerance=0.03):
@@ -55,7 +47,7 @@ landmarker = PoseLandmarker.create_from_options(options)
 cap = cv2.VideoCapture(0)
 
 # Set higher resolution
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 12800)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 128000)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 frame_id = 0
@@ -127,16 +119,16 @@ while True:
             both_is_up = False
 
         # Draw landmarks
-        #h, w, _ = frame.shape
-        #for lm in landmarks:
-        #    cx, cy = int(lm.x * w), int(lm.y * h)
-        #    cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
+        h, w, _ = frame.shape
+        for lm in landmarks:
+            cx, cy = int(lm.x * w), int(lm.y * h)
+            cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
 
         # Draw arm alignment
-        #draw_line(left_shoulder, left_elbow, frame, (255, 0, 0))
-        #draw_line(left_elbow, left_wrist, frame, (255, 0, 0))
-        #draw_line(right_shoulder, right_elbow, frame, (0, 0, 255))
-        #draw_line(right_elbow, right_wrist, frame, (0, 0, 255))
+        draw_line(left_shoulder, left_elbow, frame, (255, 255, 255))
+        draw_line(left_elbow, left_wrist, frame, (255, 255, 255))
+        draw_line(right_shoulder, right_elbow, frame, (255, 255, 255))
+        draw_line(right_elbow, right_wrist, frame, (255, 255, 255))
 
         # -------- Draw counters --------
         status = " GOOD !!!" if both_arms_up else "RAISE BOTH ARMS"
@@ -165,7 +157,7 @@ while True:
     key = cv2.waitKey(1) & 0xFF
 
     # Quit by Q
-    if key == ord("q"):
+    if key == ord("q") or key == 27:
         break
 
     # Quit by clicking X (safe)
