@@ -2,27 +2,15 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-import math
+import numpy as np
 
 # ---------------- Functions ----------------
 
 def calculate_angle(a, b, c):
-    """
-    Calculates angle at point b (in degrees)
-    a, b, c are landmarks with x,y
-    """
-    ba = (a.x - b.x, a.y - b.y)
-    bc = (c.x - b.x, c.y - b.y)
-
-    dot = ba[0]*bc[0] + ba[1]*bc[1]
-    mag_ba = math.hypot(ba[0], ba[1])
-    mag_bc = math.hypot(bc[0], bc[1])
-
-    if mag_ba == 0 or mag_bc == 0:
-        return 0
-
-    angle = math.degrees(math.acos(dot / (mag_ba * mag_bc)))
-    return angle
+    ba = np.array([a.x - b.x, a.y - b.y])
+    bc = np.array([c.x - b.x, c.y - b.y])
+    cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-6)
+    return np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0)))
 
 def draw_line(a, b, frame, color):
     h, w, _ = frame.shape
