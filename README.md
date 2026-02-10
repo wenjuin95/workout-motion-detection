@@ -53,8 +53,8 @@ cd workout-motion-detection
 
 2. Create a virtual environment (optional but recommended):
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate.bat
 ```
 
 3. Install dependencies:
@@ -66,7 +66,7 @@ pip install -r requirements.txt
 
 1. Activate the virtual environment (if you created one):
 ```bash
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate.bat
 ```
 
 2. Run the application:
@@ -90,6 +90,7 @@ python main.py
 ### Webcam not found
 - Make sure your webcam is connected and not being used by another application
 - Try changing the camera index in `main.py` (line 54): `cap = cv2.VideoCapture(0)` → try 1, 2, etc.
+- Don't use wsl it not work for webcam
 
 ### Pose detection not working
 - Ensure good lighting conditions
