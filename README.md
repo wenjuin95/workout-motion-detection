@@ -25,7 +25,7 @@ A real-time workout motion detection application that uses computer vision to tr
 
 ## Installation
 
-### Option 1: Using the Setup Script (Recommended)
+### Option 1: Using the Setup Script (Linux) (Recommended)
 
 1. Clone the repository:
 ```bash
@@ -43,7 +43,7 @@ This script will:
 - Install all required dependencies
 - Provide instructions for running the application
 
-### Option 2: Manual Installation
+### Option 2: Manual Installation (Window or Linux)
 
 1. Clone the repository:
 ```bash
