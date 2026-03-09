@@ -3,22 +3,10 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
+# ---------------- Config ----------------
+RAISE_THRESHOLD = 0.05
 
 # ---------------- Functions ----------------
-
-# Calculate angle between three points (in degrees)
-def calculate_angle(a, b, c):
-    ba = np.array([a.x - b.x, a.y - b.y])
-    bc = np.array([c.x - b.x, c.y - b.y])
-    cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-6)
-    return np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0)))
-
-# Check if three points are vertically aligned
-def is_vertical(a, b, c, tolerance=0.03):
-    return (
-        abs(a.y - b.y) < tolerance and
-        abs(b.y - c.y) < tolerance
-    )
 
 # Draw line between two landmarks
 def draw_line(a, b, frame, color):
@@ -26,8 +14,6 @@ def draw_line(a, b, frame, color):
     p1 = (int(a.x * w), int(a.y * h))
     p2 = (int(b.x * w), int(b.y * h))
     cv2.line(frame, p1, p2, color, 2)
-
-
 
 # ---------------- MediaPipe setup ----------------
 BaseOptions = python.BaseOptions
@@ -47,7 +33,7 @@ landmarker = PoseLandmarker.create_from_options(options)
 cap = cv2.VideoCapture(0)
 
 # Set higher resolution
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 128000)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 frame_id = 0
@@ -94,22 +80,19 @@ while True:
         right_elbow    = landmarks[RIGHT_ELBOW]
         right_wrist    = landmarks[RIGHT_WRIST]
 
+        # -------- Raise detection --------
+        left_up = False
+        right_up = False
+
+        if left_wrist.y < left_shoulder.y - RAISE_THRESHOLD:
+            left_up = True
+
+        if right_wrist.y < right_shoulder.y - RAISE_THRESHOLD:
+            right_up = True
+
+        both_arms_up = left_up and right_up
 
         # -------- counting logic --------
-        # Calculate angles
-        left_angle = calculate_angle(left_shoulder, left_elbow, left_wrist)
-        right_angle = calculate_angle(right_shoulder, right_elbow, right_wrist)
-        # Check vertical alignment
-        left_vertical = is_vertical(left_shoulder, left_elbow, left_wrist)
-        right_vertical = is_vertical(right_shoulder, right_elbow, right_wrist)
-
-        both_arms_up = (
-            left_vertical and
-            right_vertical and
-            left_angle > 160 and
-            right_angle > 160
-        )
-
         if both_arms_up:
             if not both_is_up:
                 both_count += 1
@@ -118,7 +101,7 @@ while True:
         else:
             both_is_up = False
 
-        # Draw landmarks
+        # -------- Draw landmarks --------
         h, w, _ = frame.shape
         for lm in landmarks:
             cx, cy = int(lm.x * w), int(lm.y * h)
@@ -130,26 +113,28 @@ while True:
         draw_line(right_shoulder, right_elbow, frame, (255, 255, 255))
         draw_line(right_elbow, right_wrist, frame, (255, 255, 255))
 
-        # -------- Draw counters --------
-        status = " GOOD !!!" if both_arms_up else "RAISE BOTH ARMS"
+        # -------- UI --------
+        status = "GOOD !!!" if both_arms_up else "RAISE BOTH ARMS"
         color = (0, 255, 0) if both_arms_up else (0, 0, 255)
 
         cv2.putText(frame, f"Reps: {both_count}", (30, 40),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+
         if both_count < 10:
-            cv2.putText(frame, f"(so weak)", (200, 40),
+            cv2.putText(frame, "(so weak)", (200, 40),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         else:
-            cv2.putText(frame, f"(Power !!!)", (200, 40),
+            cv2.putText(frame, "(Power !!!)", (200, 40),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         cv2.putText(frame, status, (30, 80),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
-        cv2.putText(frame, f"L angle: {int(left_angle)}", (30, 120),
+        # Debug info
+        cv2.putText(frame, f"L up: {left_up}", (30, 120),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
 
-        cv2.putText(frame, f"R angle: {int(right_angle)}", (30, 150),
+        cv2.putText(frame, f"R up: {right_up}", (30, 150),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
     # Show frame
