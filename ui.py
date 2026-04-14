@@ -2,11 +2,20 @@ from tkinter import *
 from workout import workout_function
 
 window = Tk()
-window.geometry("400x300")
-window.title("Workout Tracker")
+# scale according to system PPI
+ppi = window.winfo_fpixels('1i')       # pixels per inch on this display
+scale = max(1.0, ppi / 72.0)           # 72 is Tk's default PPI
+window.tk.call('tk', 'scaling', scale)
 
+# make window a fraction of the screen size
+W = int(window.winfo_screenwidth() * 0.35)
+H = int(window.winfo_screenheight() * 0.35)
+window.geometry(f"{W}x{H}")
+
+window.title("Workout Tracker")
 window.configure(bg="#2b2b2b")
 
+# title label
 label = Label(
 	window,
 	text="Welcome to Workout Tracker!",
@@ -16,6 +25,7 @@ label = Label(
 )
 label.pack(pady=20)
 
+# button to start workout
 button = Button(
 	window,
 	text="Start Workout",
@@ -30,6 +40,7 @@ button = Button(
 )
 button.pack(pady=10)
 
+# exit button
 button_exit = Button(
 	window,
 	text="Exit",
