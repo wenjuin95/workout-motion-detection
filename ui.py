@@ -4,9 +4,10 @@ from workout import workout_function
 def start_workout():
 	window.withdraw()
 	try:
-		workout_function()
+		rep = workout_function()
 	finally:
 		window.deiconify()
+		label.config(text=f"Workout complete! Total reps: {rep}")
 
 window = Tk()
 # scale according to system PPI
@@ -64,6 +65,5 @@ button_exit = Button(
 	height=2,
 	command=window.destroy
 )
-button_exit.pack(pady=10)
 
 window.mainloop()

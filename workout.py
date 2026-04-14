@@ -156,3 +156,5 @@ def workout_function():
 	# ---------------- Cleanup ----------------
 	cap.release()
 	cv2.destroyAllWindows()
+
+	return both_count
