@@ -1,6 +1,13 @@
 from tkinter import *
 from workout import workout_function
 
+def start_workout():
+	window.withdraw()
+	try:
+		workout_function()
+	finally:
+		window.deiconify()
+
 window = Tk()
 # scale according to system PPI
 ppi = window.winfo_fpixels('1i')       # pixels per inch on this display
@@ -12,16 +19,20 @@ W = int(window.winfo_screenwidth() * 0.35)
 H = int(window.winfo_screenheight() * 0.35)
 window.geometry(f"{W}x{H}")
 
+bgColor = "#2b2b2b"
+fgColor = "#ffffff"
+textFont = "Helvetica"
+
 window.title("Workout Tracker")
-window.configure(bg="#2b2b2b")
+window.configure(bg=bgColor)
 
 # title label
 label = Label(
 	window,
 	text="Welcome to Workout Tracker!",
-	font=("Helvetica", 16),
-	bg="#2b2b2b",
-	fg="#ffffff"
+	font=(textFont, 16),
+	bg=bgColor,
+	fg=fgColor
 )
 label.pack(pady=20)
 
@@ -29,14 +40,14 @@ label.pack(pady=20)
 button = Button(
 	window,
 	text="Start Workout",
-	font=("Helvetica", 14),
+	font=(textFont, 14),
 	bg="#4CAF50",
-	fg="#ffffff",
+	fg=fgColor,
 	activebackground="#419644",
-	activeforeground="#ffffff",
+	activeforeground=fgColor,
 	width=20,
 	height=2,
-	command=workout_function
+	command=start_workout
 )
 button.pack(pady=10)
 
@@ -44,11 +55,11 @@ button.pack(pady=10)
 button_exit = Button(
 	window,
 	text="Exit",
-	font=("Helvetica", 14),
+	font=(textFont, 14),
 	bg="#f44336",
-	fg="#ffffff",
+	fg=fgColor,
 	activebackground="#d32f2f",
-	activeforeground="#ffffff",
+	activeforeground=fgColor,
 	width=20,
 	height=2,
 	command=window.destroy
