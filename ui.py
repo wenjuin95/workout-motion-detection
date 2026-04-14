@@ -1,5 +1,6 @@
 from tkinter import *
 from workout import workout_function
+from calender import open_calender
 
 def start_workout():
 	window.withdraw()
@@ -20,6 +21,7 @@ window.tk.call('tk', 'scaling', scale)
 W = int(window.winfo_screenwidth() * 0.35)
 H = int(window.winfo_screenheight() * 0.35)
 window.geometry(f"{W}x{H}")
+window.attributes("-type", "dialog")  # make it a dialog window (no maximize/minimize)
 
 bgColor = "#2b2b2b"
 fgColor = "#ffffff"
@@ -62,6 +64,20 @@ button = Button(
 	command=start_workout
 )
 button.pack(pady=10)
+
+button_daily_check = Button(
+	window,
+	text="Daily Check",
+	font=(textFont, 14),
+	bg="#2196F3",
+	fg=fgColor,
+	activebackground="#1976D2",
+	activeforeground=fgColor,
+	width=20,
+	height=2,
+	command=lambda: open_calender(window)
+)
+button_daily_check.pack(pady=10)
 
 # exit button
 button_exit = Button(
