@@ -7,9 +7,10 @@ def start_workout():
 		rep = workout_function()
 	finally:
 		window.deiconify()
-		label.config(text=f"Workout complete! Total reps: {rep}")
+		status_label.config(text=f"Workout complete! You did {rep} reps.")
 
 window = Tk()
+
 # scale according to system PPI
 ppi = window.winfo_fpixels('1i')       # pixels per inch on this display
 scale = max(1.0, ppi / 72.0)           # 72 is Tk's default PPI
@@ -31,11 +32,21 @@ window.configure(bg=bgColor)
 label = Label(
 	window,
 	text="Welcome to Workout Tracker!",
-	font=(textFont, 16),
+	font=(textFont, 20),
 	bg=bgColor,
 	fg=fgColor
 )
 label.pack(pady=20)
+
+# status label
+status_label = Label(
+		window,
+		text="",
+		font=(textFont, 14),
+		bg=bgColor,
+		fg=fgColor
+	)
+status_label.pack(pady=20)
 
 # button to start workout
 button = Button(
@@ -65,5 +76,6 @@ button_exit = Button(
 	height=2,
 	command=window.destroy
 )
+button_exit.pack(pady=10)
 
 window.mainloop()
