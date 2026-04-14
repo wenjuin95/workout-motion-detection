@@ -12,6 +12,7 @@ def open_calender(parent):
 	top = tk.Toplevel(parent)
 	top.title("Workout Calendar")
 	top.configure(bg=bgColor)
+	top.resizable(False, False)
 
 	# Get the current year and month
 	now = datetime.datetime.now()
@@ -59,12 +60,12 @@ def open_calender(parent):
 				cell.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
 
 				# date
-				date_lbl = tk.Label(cell, text=str(day), font=(textFont, 10), bg=lbl_bg, fg=fgColor, anchor="w", justify="left")
+				date_lbl = tk.Label(cell, text=str(day), font=(textFont, 9), bg=lbl_bg, fg=fgColor, anchor="w", justify="left")
 				date_lbl.pack(fill="x", padx=4, pady=(2,0))
 
 				# content
-				content_lbl = tk.Label(cell, text="", font=(textFont, 11), bg=lbl_bg, fg=fgColor, anchor="center", justify="center")
-				content_lbl.pack(expand=True, fill="both", padx=4, pady=(0,4))
+				content_lbl = tk.Label(cell, text="", font=(textFont, 20), bg=lbl_bg, fg=fgColor, anchor="center", justify="center")
+				content_lbl.pack(expand=True, fill="both", padx=8, pady=8)
 
 				day_labels[day] = content_lbl
 
@@ -80,7 +81,7 @@ def open_calender(parent):
 		if lbl:
 			lbl.config(text=value_text, fg="#4CAF50")
 
-	set_day_value(5, "Today")
+	set_day_value(5, "15 reps")
 
 	# exit button callback
 	def on_close():

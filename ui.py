@@ -21,7 +21,7 @@ window.tk.call('tk', 'scaling', scale)
 W = int(window.winfo_screenwidth() * 0.35)
 H = int(window.winfo_screenheight() * 0.35)
 window.geometry(f"{W}x{H}")
-window.attributes("-type", "dialog")  # make it a dialog window (no maximize/minimize)
+window.resizable(False, False)
 
 bgColor = "#2b2b2b"
 fgColor = "#ffffff"
