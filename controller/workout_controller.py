@@ -21,9 +21,16 @@ class WorkoutController:
 		finally:
 			self.view.show()
 
+		if reps < 10:
+			comment = "(why stop? you can do more!)"
+		elif reps > 10:
+			comment = "(amazing! you are doing great!)"
+		elif reps > 20:
+			comment = "(good job! take a rest and keep going!)"
+
 		date = datetime.date.today().isoformat()
 		self.view.set_status(
-			f"Workout complete! You did {
-				self.model.get_reps_by_date(date)
-			} reps."
+			f"Total: {self.model.get_reps_by_date(date)} reps\n You did {
+				reps
+			} reps.\n {comment}"
 		)

@@ -76,6 +76,7 @@ class PoseApp:
 		cv2.line(frame, p1, p2, color, 2)
 
 	def run(self):
+		window_name = "Pose Detection"
 		while True:
 			ret, frame = self.cap.read()
 			if not ret:
@@ -105,27 +106,27 @@ class PoseApp:
 				status = "RAISE BOTH ARMS: GOOD !!!" if both_up else "RAISE BOTH ARMS"
 				color = (0,255,0) if both_up else (0,0,255)
 
-				if count > 10:
-					comment = "Excellent! Keep it up!"
-				elif count < 10:
-					comment = "Weak! You can do better!"
-				elif count > 20:
+				if count > 20:
 					comment = "Amazing! You're on fire!"
+				elif count > 10:
+					comment = "Excellent! Keep it up!"
+				else:
+					comment = "Weak! You can do better!"
 
-				cv2.putText(frame, f"Reps: {count} ({comment})", (30,40),
+				cv2.putText(frame, f"Press 'q' or 'esc' to quit", (30,40),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-				cv2.putText(frame, status, (30,80),
+				cv2.putText(frame, f"Reps: {count} ({comment})", (30,80),
+							cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+				cv2.putText(frame, status, (30,120),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
-			cv2.imshow("Pose Detection", frame)
-
-			# handle close button
-			if cv2.getWindowProperty("Pose Detection", cv2.WND_PROP_VISIBLE) < 1:
-				break
+			cv2.imshow(window_name, frame)
 
 			# handle q or esc to quit
-			if cv2.waitKey(1) & 0xFF in [ord('q'), 27]:
+			key = cv2.waitKey(1) & 0xFF
+			if key in [ord('q'), 27]:
 				break
 
 		self.cap.release()
