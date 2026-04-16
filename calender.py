@@ -100,9 +100,6 @@ class CalenderView:
 
 		self.day_labels = {}
 
-		# update title
-		# self.title_label.config(text=f"{calendar.month_name[self.current_month]} {self.current_year}")
-
 		# draw day headers
 		headers = ["Mo","Tu","We","Th","Fr","Sa","Su"]
 		for c, h in enumerate(headers):
@@ -125,7 +122,7 @@ class CalenderView:
 		lbl_bg = "#393939"
 
 		cell = tk.Frame(self.grid_frame, bg=lbl_bg, bd=1, relief="solid",
-						width=90, height=70)
+						width=120, height=100)
 		cell.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
 		cell.grid_propagate(False)
 		cell.pack_propagate(False)

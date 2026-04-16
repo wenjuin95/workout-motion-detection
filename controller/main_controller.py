@@ -12,7 +12,7 @@ class MainController:
 		self.view.daily_btn.config(command=self.open_calendar)
 
 	def start_workout(self):
-		WorkoutController(self.model, self.view.root)
+		WorkoutController(self.model, self.view)
 
 	def open_calendar(self):
 		CalendarController(self.view.root, self.model)
