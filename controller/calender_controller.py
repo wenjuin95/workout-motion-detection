@@ -12,4 +12,6 @@ class CalendarController:
 
 		for date_str, reps in reps.items():
 			day = int(date_str.split("-")[2])  # get date
-			self.view.set_day_value(day, reps)
+			month = int(date_str.split("-")[1])  # get month
+			year = int(date_str.split("-")[0])  # get year
+			self.view.set_day_value(day, month, year, reps)

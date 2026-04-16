@@ -1,116 +1,25 @@
 import calendar
 import datetime
+from email.mime import text
 import tkinter as tk
-
-# def open_calender(parent):
-# 	fgColor = "#ffffff"
-# 	bgColor = "#2b2b2b"
-# 	textFont = "Helvetica"
-
-# 	# create a new window for the calendar
-# 	top = tk.Toplevel(parent)
-# 	top.title("Workout Calendar")
-# 	top.configure(bg=bgColor)
-# 	top.resizable(False, False)
-
-# 	# Get the current year and month
-# 	now = datetime.datetime.now()
-# 	year = now.year
-# 	month = now.month
-
-# 	# Month-Year label
-# 	labelMonthYear = tk.Label(
-# 		top,
-# 		text=f"{calendar.month_name[month]} {year}",
-# 		font=(textFont, 16),
-# 		bg=bgColor,
-# 		fg=fgColor,
-# 		anchor="center",
-# 		justify="center"
-# 	)
-# 	labelMonthYear.pack(pady=10)
-
-# 	# hide the main window while calendar is open
-# 	parent.withdraw()
-
-# 	# grid frame
-# 	grid_frame = tk.Frame(top, bg=bgColor)
-# 	grid_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-
-# 	# label days of the week
-# 	headers = ["Mo","Tu","We","Th","Fr","Sa","Su"]
-# 	for c, h in enumerate(headers):
-# 		hdr = tk.Label(grid_frame, text=h, font=(textFont, 12, "bold"), fg=fgColor, bg=bgColor)
-# 		hdr.grid(row=0, column=c, padx=2, pady=2, sticky="nsew")
-
-# 	# build month as grid using calendar.monthcalendar
-# 	weeks = calendar.monthcalendar(year, month)
-# 	day_labels = {}
-# 	for r, week in enumerate(weeks, start=1):
-# 		for c, day in enumerate(week):
-# 			# if day is 0 then create empty cell
-# 			if day == 0:
-# 				cell = tk.Frame(grid_frame, bd=1, bg=bgColor,relief="solid")
-# 				cell.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
-# 			else:
-# 				# cell frame with two labels: date (left) and content (center)
-# 				lbl_bg = "#393939"
-# 				cell = tk.Frame(grid_frame, bg=lbl_bg, bd=1, relief="solid")
-# 				cell.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
-
-# 				# date
-# 				date_lbl = tk.Label(cell, text=str(day), font=(textFont, 9), bg=lbl_bg, fg=fgColor, anchor="w", justify="left")
-# 				date_lbl.pack(fill="x", padx=4, pady=(2,0))
-
-# 				# content
-# 				content_lbl = tk.Label(cell, text="", font=(textFont, 20), bg=lbl_bg, fg=fgColor, anchor="center", justify="center")
-# 				content_lbl.pack(expand=True, fill="both", padx=8, pady=8)
-
-# 				day_labels[day] = content_lbl
-
-# 	# configure grid weights for responsiveness
-# 	for c in range(7):
-# 		grid_frame.grid_columnconfigure(c, weight=1, uniform="col")
-# 	for r in range(len(weeks) + 1):
-# 		grid_frame.grid_rowconfigure(r, weight=1, uniform="row")
-
-# 	# helper to set a day's value later
-# 	def set_day_value(day_num, value_text):
-# 		lbl = day_labels.get(day_num)
-# 		if lbl:
-# 			lbl.config(text=value_text, fg="#4CAF50")
-
-# 	set_day_value(5, "15 reps")
-
-# 	# exit button
-# 	button_exit = tk.Button(
-# 		top,
-# 		text="Close",
-# 		font=(textFont, 14),
-# 		bg="#f44336",
-# 		fg=fgColor,
-# 		activebackground="#d32f2f",
-# 		activeforeground=fgColor,
-# 		width=20,
-# 		height=2,
-# 		command= {
-# 			top.destroy,
-# 			parent.deiconify
-# 		}
-# 	)
-# 	button_exit.pack(pady=10)
-# 	top.protocol("WM_DELETE_WINDOW", {
-# 		top.destroy,
-# 		parent.deiconify
-# 	})
 
 class CalenderView:
 	def __init__(self, parent):
 		self.parent = parent
 
+		self.workout_data = {}
+		self.day_labels = {}
+
 		self.fgColor = "#ffffff"
 		self.bgColor = "#2b2b2b"
 		self.textFont = "Helvetica"
+		self.exit_button_color = "#f44336"
+		self.active_exit_button_color = "#d32f2f"
+
+		# Initialize to current date
+		now = datetime.datetime.now()
+		self.current_year = now.year
+		self.current_month = now.month
 
 		self.day_labels = {}
 
@@ -124,30 +33,77 @@ class CalenderView:
 		self.top.resizable(False, False)
 
 		self.parent.withdraw()
-
 		self.top.protocol("WM_DELETE_WINDOW", self.close)
 
 	def build_calendar(self):
-		now = datetime.datetime.now()
-		year = now.year
-		month = now.month
+		#header for navigate
+		header_frame = tk.Frame(self.top, bg=self.bgColor)
+		header_frame.pack(fill="x", pady=10)
 
-		self.top.geometry("700x600")
+		# prev month
+		tk.Button(
+			header_frame,
+			text=" < ",
+			command=self.prev_month,
+		).pack(side="left", padx=20)
 
-		# Title
-		label = tk.Label(
-			self.top,
-			text=f"{calendar.month_name[month]} {year}",
-			font=(self.textFont, 16),
-			bg=self.bgColor,
-			fg=self.fgColor
+		selectors_frame = tk.Frame(header_frame, bg=self.bgColor)
+		selectors_frame.pack(side="left", expand=True)
+
+		# Month Selector
+		self.month_var = tk.StringVar(value=calendar.month_name[self.current_month])
+		month_names = [calendar.month_name[i] for i in range(1, 13)]
+		self.month_menu = tk.OptionMenu(
+			selectors_frame, self.month_var, *month_names, command=self.on_date_select
 		)
-		label.pack(pady=10)
+		self.month_menu.config(highlightthickness=0, indicatoron=0)
+		self.month_menu["menu"].config(bg=self.bgColor, fg=self.fgColor)
+		self.month_menu.pack(side="left", padx=5)
 
-		# Grid frame
+		# Year Selector (Range from 2026 to 2037, adjust as needed)
+		self.year_var = tk.StringVar(value=str(self.current_year))
+		years = [str(y) for y in range(2026, 2037)]
+		self.year_menu = tk.OptionMenu(
+			selectors_frame, self.year_var, *years, command=self.on_date_select
+		)
+		self.year_menu.config(highlightthickness=0, indicatoron=0)
+		self.year_menu["menu"].config(bg=self.bgColor, fg=self.fgColor)
+		self.year_menu.pack(side="left", padx=5)
+
+		# next month
+		tk.Button(
+			header_frame,
+			text=" > ",
+			command=self.next_month
+		).pack(side="right", padx=20)
+
+		# grid frame
 		self.grid_frame = tk.Frame(self.top, bg=self.bgColor)
 		self.grid_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
+		# initial draw
+		self.draw_grid()
+
+		# close button
+		tk.Button(
+			self.top,
+			text="Close",
+			command=self.close,
+			bg=self.exit_button_color,
+			fg=self.fgColor
+		).pack(pady=10)
+
+	def draw_grid(self):
+		# clear existing grid
+		for widget in self.grid_frame.winfo_children():
+			widget.destroy()
+
+		self.day_labels = {}
+
+		# update title
+		# self.title_label.config(text=f"{calendar.month_name[self.current_month]} {self.current_year}")
+
+		# draw day headers
 		headers = ["Mo","Tu","We","Th","Fr","Sa","Su"]
 		for c, h in enumerate(headers):
 			tk.Label(
@@ -158,38 +114,25 @@ class CalenderView:
 				bg=self.bgColor
 			).grid(row=0, column=c, padx=2, pady=2, sticky="nsew")
 
-		weeks = calendar.monthcalendar(year, month)
-
+		# draw dates
+		weeks = calendar.monthcalendar(self.current_year, self.current_month)
 		for r, week in enumerate(weeks, start=1):
 			for c, day in enumerate(week):
-				if day == 0:
-					tk.Frame(self.grid_frame, bg=self.bgColor, bd=1).grid(
-						row=r, column=c, padx=2, pady=2, sticky="nsew"
-					)
-				else:
-					self.create_day_cell(r, c, day)
+				if day != 0:
+					self.create_date_content(r, c, day)
 
-		# Close button
-		tk.Button(
-			self.top,
-			text="Close",
-			command=self.close
-		).pack(pady=10)
-
-	def create_day_cell(self, r, c, day):
+	def create_date_content(self, r, c, day):
 		lbl_bg = "#393939"
 
 		cell = tk.Frame(self.grid_frame, bg=lbl_bg, bd=1, relief="solid",
-						width=100, height=80)
+						width=90, height=70)
 		cell.grid(row=r, column=c, padx=2, pady=2, sticky="nsew")
 		cell.grid_propagate(False)
 		cell.pack_propagate(False)
 
-		for c in range(7):
-			self.grid_frame.grid_columnconfigure(c, weight=1)
-
-		for r in range(6):
-			self.grid_frame.grid_rowconfigure(r, weight=1)
+		# config width/height to expand equally
+		self.grid_frame.grid_columnconfigure(c, weight=1)
+		self.grid_frame.grid_rowconfigure(r, weight=1)
 
 		tk.Label(
 			cell,
@@ -200,20 +143,58 @@ class CalenderView:
 			anchor="w"
 		).pack(fill="x", padx=4)
 
+		# check for save workout data for this day
+		saved_text = self.workout_data.get((self.current_year, self.current_month, day), "")
 		content = tk.Label(
 			cell,
-			text="",
+			text=saved_text,
 			font=(self.textFont, 20),
 			bg=lbl_bg,
-			fg=self.fgColor
+			fg="#4CAF50"
 		)
 		content.pack(expand=True, fill="both", padx=8, pady=8)
 
 		self.day_labels[day] = content
 
-	def set_day_value(self, day, text):
-		if day in self.day_labels:
-			self.day_labels[day].config(text=text, fg="#4CAF50")
+	def on_date_select(self, *args):
+		"""Called when dropdown values change."""
+		# Convert month name back to number
+		month_str = self.month_var.get()
+		self.current_month = list(calendar.month_name).index(month_str)
+		self.current_year = int(self.year_var.get())
+		self.draw_grid()
+
+	def update_selectors(self):
+		"""Syncs the dropdowns with the current state (used by prev/next buttons)."""
+		self.month_var.set(calendar.month_name[self.current_month])
+		self.year_var.set(str(self.current_year))
+
+	def prev_month(self):
+		if self.current_month == 1:
+			self.current_month = 12
+			self.current_year -= 1
+		else:
+			self.current_month -= 1
+		self.update_selectors()
+		self.draw_grid()
+
+	def next_month(self):
+		if self.current_month == 12:
+			self.current_month = 1
+			self.current_year += 1
+		else:
+			self.current_month += 1
+		self.update_selectors()
+		self.draw_grid()
+
+	def set_day_value(self, day, month, year, text):
+		# 1. Save to the permanent dictionary
+		self.workout_data[(year, month, day)] = text
+
+		# 2. Update the UI only if the user is currently looking at that month
+		if month == self.current_month and year == self.current_year:
+			if day in self.day_labels:
+				self.day_labels[day].config(text=text, fg="#4CAF50")
 
 	def close(self):
 		self.top.destroy()
