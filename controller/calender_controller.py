@@ -1,4 +1,4 @@
-from calender import CalenderView
+from controller.calender import CalenderView
 
 class CalendarController:
 	def __init__(self, parent, model):

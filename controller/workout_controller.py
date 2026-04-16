@@ -1,4 +1,4 @@
-from workout import workout_function
+from controller.workout import workout_function
 import datetime
 
 class WorkoutController:
