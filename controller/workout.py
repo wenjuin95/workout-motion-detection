@@ -39,6 +39,7 @@ class WorkoutTracker:
 		self.hold_time = hold_time
 		self.count = 0
 		self.both_is_up = False
+		self.start_hold = None
 
 	def check_arms(self, landmarks):
 		LEFT_SHOULDER, LEFT_WRIST = 12, 16
@@ -116,10 +117,11 @@ class PoseApp:
 				self.draw_line(landmarks[11], landmarks[13], frame, (255,255,255))
 				self.draw_line(landmarks[13], landmarks[15], frame, (255,255,255))
 
-				# UI
-				status = "RAISE BOTH ARMS: GOOD !!!" if both_up else "RAISE BOTH ARMS"
-				color = (0,255,0) if both_up else (0,0,255)
+				# Display instructions
+				cv2.putText(frame, f"Press 'q' or 'esc' to quit", (30,40),
+							cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
+				# Display count with comment
 				if count > 20:
 					comment = "Amazing! You're on fire!"
 				elif count > 10:
@@ -127,23 +129,30 @@ class PoseApp:
 				else:
 					comment = "Weak! You can do better!"
 
-				cv2.putText(frame, f"Press 'q' or 'esc' to quit", (30,40),
-							cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
 				cv2.putText(frame, f"Reps: {count} ({comment})", (30,80),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-				penalty_text = f"Hold {self.tracker.hold_time}s per rep" if self.tracker.hold_time > 0 else "Normal mode"
+				# Display penalty status
+				penalty_text = "Normal mode" if self.tracker.hold_time <= 0 else f"Hold for {self.tracker.hold_time}s"
+				if self.tracker.hold_time > 0 and both_up and not self.tracker.both_is_up and self.tracker.start_hold is not None:
+					remaining = self.tracker.hold_time - (time.time() - self.tracker.start_hold)
+					if remaining > 0:
+						remaining_int = int(remaining + 0.999)
+						penalty_text = f"Hold for {remaining_int}s"
 
 				cv2.putText(frame, penalty_text, (30,120),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+
+				# Display arm status
+				status = "RAISE BOTH ARMS: GOOD !!!" if both_up else "RAISE BOTH ARMS"
+				color = (0,255,0) if both_up else (0,0,255)
 
 				cv2.putText(frame, status, (30,160),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
 			cv2.imshow(window_name, frame)
 
-			# handle q or esc to quit
+			# Handle q or esc to quit
 			key = cv2.waitKey(1) & 0xFF
 			if key in [ord('q'), 27]:
 				break
