@@ -30,7 +30,5 @@ class WorkoutController:
 
 		date = datetime.date.today().isoformat()
 		self.view.set_status(
-			f"Total: {self.model.get_reps_by_date(date)} reps\n You did {
-				reps
-			} reps.\n {comment}"
+			f"Total: {self.model.get_reps_by_date(date)} reps\n You did {reps} reps.\n {comment}"
 		)
