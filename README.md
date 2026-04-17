@@ -8,7 +8,7 @@ A real-time workout motion detection application that uses computer vision to tr
 - **Real-time Pose Detection**: Uses MediaPipe Pose Landmarker for accurate body pose estimation
 - **Arm Tracking**: Detects and tracks both arms (shoulders, elbows, wrists)
 - **Repetition Counter**: Automatically counts when both arms are raised vertically
-- **Visual Feedback**: 
+- **Visual Feedback**:
   - Displays real-time rep count
   - Shows motivational messages based on performance
   - Shows arm angles for debugging
@@ -16,8 +16,17 @@ A real-time workout motion detection application that uses computer vision to tr
 
 ## Requirements
 
-- Python 3.7 or higher
 - Webcam
+- Python 3.7 or higher
+- Tkinter
+	- (Linux)
+		1. sudo apt-get install python3-tk
+	- (window)
+		1. Open **Control Panel** > **Apps**
+		2. Find **Python 3.x**, right-click the **three dot**, then **Modify**
+		3. Choose **Modify**
+		4. Check the bow for **tcl/tk and IDLE**
+		5. Click install/next until finished
 - The following Python packages:
   - OpenCV (opencv-python==4.13.0.92)
   - OpenCV contrib (opencv-contrib-python==4.13.0.92)
@@ -25,7 +34,7 @@ A real-time workout motion detection application that uses computer vision to tr
 
 ## Installation
 
-### Option 1: Using the Setup Script (Linux) (Recommended)
+### Option 1: (Linux) (Recommended) Using the Setup Script
 
 1. Clone the repository:
 ```bash
@@ -38,12 +47,19 @@ cd body-motion-detection
 bash setup_venv.sh
 ```
 
-This script will:
-- Create a Python virtual environment
-- Install all required dependencies
-- Provide instructions for running the application
+### Option 2: (Window) Using the Setup Script
+1. Clone the repository in command prompt:
+```bash
+git clone https://github.com/wenjuin95/body-motion-detection.git
+cd body-motion-detection
+```
 
-### Option 2: Manual Installation (Window or Linux)
+2. run the setup script:
+```bash
+setup_with_window.bat
+```
+
+### Option 3: Manual Installation (Window or Linux)
 
 1. Clone the repository:
 ```bash
@@ -54,7 +70,7 @@ cd workout-motion-detection
 2. Create a virtual environment (optional but recommended):
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate.bat
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -101,17 +117,6 @@ python main.py
 - Verify all dependencies are installed: `pip list`
 - Make sure the `pose_landmarker_lite.task` model file is present in the project directory
 
-## Project Structure
-
-```
-workout-motion-detection/
-├── main.py                      # Main application code
-├── pose_landmarker_lite.task    # MediaPipe pose detection model
-├── requirements.txt             # Python dependencies
-├── setup_venv.sh               # Virtual environment setup script
-├── .gitignore                  # Git ignore rules
-└── README.md                   # This file
-```
 ## Acknowledgments
 
 - [MediaPipe](https://mediapipe.dev/) by Google for the pose estimation model
