@@ -1,6 +1,6 @@
 # Workout Motion Detection
 
-<img src="https://github.com/wenjuin95/workout-motion-detection/blob/public/title.png" width="40%">
+<img src="https://github.com/wenjuin95/workout-motion-detection/blob/main/public/title.png" width="40%">
 
 A real-time workout application that leverages computer vision to ensure perfect form and daily discipline. This project uses MediaPipe’s Pose Landmarker and OpenCV to track arm kinematics and provide instant feedback.
 
@@ -14,7 +14,7 @@ A real-time workout application that leverages computer vision to ensure perfect
 	- **Live Metrics**: Displays real-time rep counts and joint angles.
 	- **Dynamic Feedback**: Context-aware motivational messages.
 - **Persistence & Tracking**: Integrated database to log daily reps with a visual Calendar View.
-	<img src="https://github.com/wenjuin95/workout-motion-detection/blob/public/calender.png" width="40%">
+	<img src="https://github.com/wenjuin95/workout-motion-detection/blob/main/public/calender.png" width="40%">
 - **The Penalty System**:
   	- Consistency is mandatory. If you fail to hit the daily goal of 10 reps, the app increases the difficulty of your next workout.
   	  	- The Trigger: Complete < 10 reps today
