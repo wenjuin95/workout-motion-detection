@@ -12,11 +12,57 @@ class WorkoutController:
 		self.view.hide()
 
 		try:
-			rep = self.model.get_reps_by_date(datetime.date.today().isoformat())
-			if rep is not None:
-				current_reps = int(rep)
-			reps = workout_function()
-			if (reps >= current_reps):
+			today = datetime.date.today()
+			yesterday = today - datetime.timedelta(days=1)
+
+			yesterday_rep = self.model.get_reps_by_date(yesterday.isoformat())
+
+			# give penalty for not doing workout yesterday, and keep doubling for consecutive failed days
+			hold_time = 0
+			if self.model.has_record():
+				yesterday_rep = self.model.get_reps_by_date(yesterday.isoformat())
+
+				if yesterday_rep is None or int(yesterday_rep) < 10:
+					hold_time = 2
+					check_day = yesterday - datetime.timedelta(days=1)
+
+					while True:
+						rep = self.model.get_reps_by_date(check_day.isoformat())
+
+						if rep is not None and int(rep) >= 10:
+							break
+
+						if rep is None:
+							hold_time *= 2
+						elif int(rep) < 10:
+							hold_time *= 2
+
+						check_day -= datetime.timedelta(days=1)
+
+						if hold_time > 16:
+							break
+
+				# keep doubling for consecutive failed days
+				check_day = yesterday - datetime.timedelta(days=1)
+				while True:
+					rep = self.model.get_reps_by_date(check_day.isoformat())
+					rep = int(rep) if rep is not None else 0
+
+					if rep >= 10:
+						break
+
+					hold_time *= 2
+					check_day -= datetime.timedelta(days=1)
+
+					if hold_time > 16:  # prevent infinite punishment
+						break
+
+			reps = workout_function(hold_time)
+
+			current_rep = self.model.get_reps_by_date(today.isoformat())
+			current_rep = int(current_rep) if current_rep is not None else 0
+
+			if reps >= current_rep:
 				self.model.set_reps(reps)
 		finally:
 			self.view.show()

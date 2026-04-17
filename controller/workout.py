@@ -34,8 +34,9 @@ class PoseDetector:
 		return None
 
 class WorkoutTracker:
-	def __init__(self, threshold=0.05):
+	def __init__(self, threshold=0.05, hold_time=0):
 		self.threshold = threshold
+		self.hold_time = hold_time
 		self.count = 0
 		self.both_is_up = False
 
@@ -50,20 +51,33 @@ class WorkoutTracker:
 
 	def update(self, left_up, right_up):
 		both_up = left_up and right_up
+		now = time.time()
 
 		if both_up:
-			if not self.both_is_up:
-				self.count += 1
-			self.both_is_up = True
+			if self.start_hold is None:
+				self.start_hold = now
+
+			elapsed = now - self.start_hold
+
+			if self.hold_time == 0:
+				if not self.both_is_up:
+					self.count += 1
+					self.both_is_up = True
+
+			elif elapsed >= self.hold_time:
+				if not self.both_is_up:
+					self.count += 1
+					self.both_is_up = True
 		else:
 			self.both_is_up = False
+			self.start_hold = None
 
 		return both_up, self.count
 
 class PoseApp:
-	def __init__(self):
+	def __init__(self, hold_time=0):
 		self.detector = PoseDetector()
-		self.tracker = WorkoutTracker()
+		self.tracker = WorkoutTracker(hold_time=hold_time)
 
 		self.cap = cv2.VideoCapture(0)
 		self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -119,7 +133,12 @@ class PoseApp:
 				cv2.putText(frame, f"Reps: {count} ({comment})", (30,80),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-				cv2.putText(frame, status, (30,120),
+				penalty_text = f"Hold {self.tracker.hold_time}s per rep" if self.tracker.hold_time > 0 else "Normal mode"
+
+				cv2.putText(frame, penalty_text, (30,120),
+							cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+
+				cv2.putText(frame, status, (30,160),
 							cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
 			cv2.imshow(window_name, frame)
@@ -135,6 +154,6 @@ class PoseApp:
 
 		return self.tracker.count
 
-def workout_function():
-	app = PoseApp()
+def workout_function(hold_time=0):
+	app = PoseApp(hold_time)
 	return app.run()

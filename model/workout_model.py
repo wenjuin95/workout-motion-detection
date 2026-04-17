@@ -62,5 +62,11 @@ class WorkoutModel:
 			for row in rows
 		}
 
+	def has_record(self):
+		cursor = self.conn.cursor()
+		cursor.execute("SELECT COUNT(*) FROM workouts")
+		count = cursor.fetchone()[0]
+		return count > 0
+
 	def close(self):
 		self.conn.close()
