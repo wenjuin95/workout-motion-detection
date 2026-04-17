@@ -1,4 +1,4 @@
-# Workout tracker
+# Workout Tracker
 
 <img src="https://github.com/wenjuin95/workout-motion-detection/blob/main/public/title.png" width="40%">
 
