@@ -1,5 +1,7 @@
 # Workout Motion Detection
 
+![](https://github.com/wenjuin95/workout-motion-detection/blob/public/title.png)
+
 A real-time workout motion detection application that uses computer vision to track arm movements and count repetitions. This project leverages MediaPipe's pose estimation and OpenCV to detect when both arms are raised vertically.
 
 ## Features
@@ -13,6 +15,9 @@ A real-time workout motion detection application that uses computer vision to tr
   - Shows motivational messages based on performance
   - Shows arm angles for debugging
 - **Webcam Integration**: Works with any standard webcam
+- **Daily Check**: daily workout reps will record to the database and view in the calender
+
+![](https://github.com/wenjuin95/workout-motion-detection/blob/public/calender.png)
 
 ## Requirements
 
