@@ -1,23 +1,32 @@
 # Workout Motion Detection
 
-![](https://github.com/wenjuin95/workout-motion-detection/blob/public/title.png)
+<img src="https://github.com/wenjuin95/workout-motion-detection/blob/public/title.png" width="40%">
 
-A real-time workout motion detection application that uses computer vision to track arm movements and count repetitions. This project leverages MediaPipe's pose estimation and OpenCV to detect when both arms are raised vertically.
+A real-time workout application that leverages computer vision to ensure perfect form and daily discipline. This project uses MediaPipe’s Pose Landmarker and OpenCV to track arm kinematics and provide instant feedback.
 
 ## Features
 
 ## **ALERT: currently only for track dumbbell lateral raise
-- **Real-time Pose Detection**: Uses MediaPipe Pose Landmarker for accurate body pose estimation
-- **Arm Tracking**: Detects and tracks both arms (shoulders, elbows, wrists)
-- **Repetition Counter**: Automatically counts when both arms are raised vertically
-- **Visual Feedback**:
-  - Displays real-time rep count
-  - Shows motivational messages based on performance
-  - Shows arm angles for debugging
-- **Webcam Integration**: Works with any standard webcam
-- **Daily Check**: daily workout reps will record to the database and view in the calender
+- **Real-time Pose Estimation**: High-fidelity body tracking using MediaPipe.
+- **Dual-Arm Kinematics**: Synchronous tracking of shoulders, elbows, and wrists to ensure symmetrical movement.
+- **Automated Rep Counting**: Intelligent detection of the vertical peak for dumbbell lateral raises.
+- **Performance Dashboard**:
+	- **Live Metrics**: Displays real-time rep counts and joint angles.
+	- **Dynamic Feedback**: Context-aware motivational messages.
+- **Persistence & Tracking**: Integrated database to log daily reps with a visual Calendar View.
+	<img src="https://github.com/wenjuin95/workout-motion-detection/blob/public/calender.png" width="40%">
+- **The Penalty System**:
+  	- Consistency is mandatory. If you fail to hit the daily goal of 10 reps, the app increases the difficulty of your next workout.
+  	  	- The Trigger: Complete < 10 reps today
+  	  	- The Penalty: You must hold for 2 seconds at the top of every rep tomorrow
+  	  	- The Multiplier: Every consecutive day you miss the goal, the hold time doubles ($x2$)
+			- Example: Miss 1 day = 2s hold. Miss 2 days = 4s hold. Miss 3 days = 8s hold.
 
-![](https://github.com/wenjuin95/workout-motion-detection/blob/public/calender.png)
+
+## 🗺️ Roadmap
+The core engine is built to be modular. Future updates will include:
+- 🔄 New Exercises: Support for Bicep Curls, Overhead Presses, and Squats.
+- 📈 Progress Analytics: Weekly volume charts and performance trends.
 
 ## Requirements
 
