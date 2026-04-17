@@ -1,4 +1,5 @@
-from workout import workout_function
+from controller.workout import workout_function
+import datetime
 
 class WorkoutController:
 	def __init__(self, model, view):
@@ -11,11 +12,25 @@ class WorkoutController:
 		self.view.hide()
 
 		try:
+			rep = self.model.get_reps_by_date(datetime.date.today().isoformat())
+			if rep is not None:
+				current_reps = int(rep)
 			reps = workout_function()
-			self.model.set_reps(reps)
+			if (reps >= current_reps):
+				self.model.set_reps(reps)
 		finally:
 			self.view.show()
 
+		if reps < 10:
+			comment = "(why stop? you can do more!)"
+		elif reps > 10:
+			comment = "(amazing! you are doing great!)"
+		elif reps > 20:
+			comment = "(good job! take a rest and keep going!)"
+
+		date = datetime.date.today().isoformat()
 		self.view.set_status(
-			f"Workout complete! You did {self.model.get_reps()} reps."
+			f"Total: {self.model.get_reps_by_date(date)} reps\n You did {
+				reps
+			} reps.\n {comment}"
 		)
