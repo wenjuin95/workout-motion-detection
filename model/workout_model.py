@@ -1,72 +1,79 @@
 import datetime
-import sqlite3
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-#for data storage and manipulation of workout information
+Base = declarative_base()
+
+# table definition
+class Workout(Base):
+	__tablename__ = 'workouts'
+
+	id = Column(Integer, primary_key=True, autoincrement=True)
+	date = Column(String, unique=True, nullable=False)
+	reps = Column(Integer, nullable=False)
 
 class WorkoutModel:
 	def __init__(self):
-		self.conn = sqlite3.connect("workout.db")
-		self.cursor = self.conn.cursor()
+		# create database connection (echo=False is to suppress SQL logging)
+		self.engine = create_engine("sqlite:///workout.db", echo=False)
+		# help to create the table if it doesn't exist
+		Base.metadata.create_all(self.engine)
 
-		self._create_table()
+		# primary interface use to interact with the database
+		# as a "workspace" for all operations
+		Session = sessionmaker(bind=self.engine)
+		self.session = Session()
+
 		self.reps = 0
 
-	def _create_table(self):
-		self.cursor.execute("""
-			CREATE TABLE IF NOT EXISTS workouts (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				date TEXT NOT NULL UNIQUE,
-				reps INTEGER NOT NULL
-			)
-		""")
-		self.conn.commit()
-
 	def set_reps(self, reps, date=None):
+		'''
+		save the reps with the date into the database, if the date is not provided, use today's date as default
+		:param reps: the number of reps to save
+		:param date: the date to save the reps for, in ISO format (YYYY-MM-DD), default is None which means use today's date
+		'''
+
 		if date is None:
 			date = datetime.date.today().isoformat()
 
-		self.cursor.execute("""
-			UPDATE workouts
-			SET reps = ?
-			WHERE date = ?
-		""", (reps, date))
+		workout_data = self.session.query(Workout).filter_by(date=date).first()
 
-		if self.cursor.rowcount == 0:
-			self.cursor.execute("""
-				INSERT INTO workouts (date, reps)
-				VALUES (?, ?)
-			""", (date, reps))
+		# if the data is exist just update, otherwise create a new record
+		if workout_data:
+			workout_data.reps = reps
+		else:
+			new_reps = Workout(date=date, reps=reps)
+			self.session.add(new_reps)
 
-		self.conn.commit()
+		self.session.commit()
 		print(f"[DB] SAVED: {date} - {reps} reps")
 
 	def get_reps_by_date(self, date):
-		self.cursor.execute("""
-			SELECT reps FROM workouts WHERE date = ?
-		""", (date,))
-
-		result = self.cursor.fetchone()
-
-		return result[0] if result else None
+		'''
+		get the reps by date, return None if no record found
+		:param date: the date to get the reps for, in ISO format (YYYY-MM-DD)
+		:return: the number of reps for the given date, or None if no record found
+		'''
+		workout_data = self.session.query(Workout).filter_by(date=date).first()
+		return workout_data.reps if workout_data else None
 
 	def get_all_workouts(self):
+		'''
+		get all workouts as a dictionary {date: reps}
+		:return: a dictionary mapping dates to the number of reps
+		'''
 		print(f"[DB] Fetching all workouts...")
-		self.cursor.execute("""
-			SELECT date, reps FROM workouts
-		""")
-
-		rows = self.cursor.fetchall()
+		rows = self.session.query(Workout).all()
 
 		return {
-			row[0]: row[1]
+			row.date: row.reps
 			for row in rows
 		}
 
 	def has_record(self):
-		cursor = self.conn.cursor()
-		cursor.execute("SELECT COUNT(*) FROM workouts")
-		count = cursor.fetchone()[0]
+		'''
+		check if there is any workout record in the database
+		:return: True if there is at least one record, False otherwise
+		'''
+		count = self.session.query(Workout).count()
 		return count > 0
-
-	def close(self):
-		self.conn.close()
