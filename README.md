@@ -45,6 +45,7 @@ The core engine is built to be modular. Future updates will include:
   - OpenCV (opencv-python==4.13.0.92)
   - OpenCV contrib (opencv-contrib-python==4.13.0.92)
   - MediaPipe (mediapipe==0.10.30)
+  - SQLAlchemy
 
 ## Installation
 
